@@ -188,10 +188,15 @@ CGFloat	__ccContentScaleFactor = 1;
 -(void) setProjection:(ccDirectorProjection)projection
 {
 	CGSize size = winSizeInPixels_;
+    
+    if( CC_CONTENT_SCALE_FACTOR() != 1)
+        glViewport(0, -size.height * CC_CONTENT_SCALE_FACTOR() / 2.0f, size.width * CC_CONTENT_SCALE_FACTOR(), size.height * CC_CONTENT_SCALE_FACTOR());
+    else
+        glViewport(0, 0, size.width, size.height);
+
 	
 	switch (projection) {
 		case kCCDirectorProjection2D:
-			glViewport(0, 0, size.width, size.height);
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
 			ccglOrtho(0, size.width, 0, size.height, -1024 * CC_CONTENT_SCALE_FACTOR(), 1024 * CC_CONTENT_SCALE_FACTOR());
@@ -203,7 +208,6 @@ CGFloat	__ccContentScaleFactor = 1;
 		{
 			float zeye = [self getZEye];
 
-			glViewport(0, 0, size.width, size.height);
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
 //			gluPerspective(60, (GLfloat)size.width/size.height, zeye-size.height/2, zeye+size.height/2 );

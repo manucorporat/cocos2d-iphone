@@ -113,7 +113,7 @@ typedef enum {
 	BOOL	rectRotated_;
 	
 	// Offset Position (used by Zwoptex)
-	CGPoint	offsetPositionInPixels_;
+	CGPoint	offsetPosition_;
 	CGPoint unflippedOffsetPositionFromCenter_;
 
 	// vertex coords, texture coords and color info

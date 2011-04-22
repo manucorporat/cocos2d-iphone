@@ -73,9 +73,9 @@
 #pragma mark CCNode - Transform related properties
 
 @synthesize rotation = rotation_, scaleX = scaleX_, scaleY = scaleY_;
-@synthesize position = position_, positionInPixels = positionInPixels_;
-@synthesize anchorPoint = anchorPoint_, anchorPointInPixels = anchorPointInPixels_;
-@synthesize contentSize = contentSize_, contentSizeInPixels = contentSizeInPixels_;
+@synthesize position = position_;
+@synthesize anchorPoint = anchorPoint_, anchorPointInPoints = anchorPointInPoints_;
+@synthesize contentSize = contentSize_;
 @synthesize isRelativeAnchorPoint = isRelativeAnchorPoint_;
 
 // getters synthesized, setters explicit
@@ -109,25 +109,6 @@
 -(void) setPosition: (CGPoint)newPosition
 {
 	position_ = newPosition;
-	if( CC_CONTENT_SCALE_FACTOR() == 1 )
-		positionInPixels_ = position_;
-	else
-		positionInPixels_ = ccpMult( newPosition,  CC_CONTENT_SCALE_FACTOR() );
-	
-	isTransformDirty_ = isInverseDirty_ = YES;
-#if CC_NODE_TRANSFORM_USING_AFFINE_MATRIX
-	isTransformGLDirty_ = YES;
-#endif	
-}
-
--(void) setPositionInPixels:(CGPoint)newPosition
-{
-	positionInPixels_ = newPosition;
-
-	if( CC_CONTENT_SCALE_FACTOR() == 1 )
-		position_ = positionInPixels_;
-	else
-		position_ = ccpMult( newPosition, 1/CC_CONTENT_SCALE_FACTOR() );
 	
 	isTransformDirty_ = isInverseDirty_ = YES;
 #if CC_NODE_TRANSFORM_USING_AFFINE_MATRIX
@@ -148,7 +129,7 @@
 {
 	if( ! CGPointEqualToPoint(point, anchorPoint_) ) {
 		anchorPoint_ = point;
-		anchorPointInPixels_ = ccp( contentSizeInPixels_.width * anchorPoint_.x, contentSizeInPixels_.height * anchorPoint_.y );
+		anchorPointInPoints_ = ccp( contentSize_.width * anchorPoint_.x, contentSize_.height * anchorPoint_.y );
 		isTransformDirty_ = isInverseDirty_ = YES;
 #if CC_NODE_TRANSFORM_USING_AFFINE_MATRIX
 		isTransformGLDirty_ = YES;
@@ -160,31 +141,8 @@
 {
 	if( ! CGSizeEqualToSize(size, contentSize_) ) {
 		contentSize_ = size;
-		
-		if( CC_CONTENT_SCALE_FACTOR() == 1 )
-			contentSizeInPixels_ = contentSize_;
-		else
-			contentSizeInPixels_ = CGSizeMake( size.width * CC_CONTENT_SCALE_FACTOR(), size.height * CC_CONTENT_SCALE_FACTOR() );
-		
-		anchorPointInPixels_ = ccp( contentSizeInPixels_.width * anchorPoint_.x, contentSizeInPixels_.height * anchorPoint_.y );
-		isTransformDirty_ = isInverseDirty_ = YES;
-#if CC_NODE_TRANSFORM_USING_AFFINE_MATRIX
-		isTransformGLDirty_ = YES;
-#endif		
-	}
-}
-
--(void) setContentSizeInPixels:(CGSize)size
-{
-	if( ! CGSizeEqualToSize(size, contentSizeInPixels_) ) {
-		contentSizeInPixels_ = size;
-
-		if( CC_CONTENT_SCALE_FACTOR() == 1 )
-			contentSize_ = contentSizeInPixels_;
-		else
-			contentSize_ = CGSizeMake( size.width / CC_CONTENT_SCALE_FACTOR(), size.height / CC_CONTENT_SCALE_FACTOR() );
-		
-		anchorPointInPixels_ = ccp( contentSizeInPixels_.width * anchorPoint_.x, contentSizeInPixels_.height * anchorPoint_.y );
+        
+		anchorPointInPoints_ = ccp( contentSize_.width * anchorPoint_.x, contentSize_.height * anchorPoint_.y );
 		isTransformDirty_ = isInverseDirty_ = YES;
 #if CC_NODE_TRANSFORM_USING_AFFINE_MATRIX
 		isTransformGLDirty_ = YES;
@@ -194,19 +152,13 @@
 
 - (CGRect) boundingBox
 {
-	CGRect ret = [self boundingBoxInPixels];
-	return CC_RECT_PIXELS_TO_POINTS( ret );
-}
-
-- (CGRect) boundingBoxInPixels
-{
-	CGRect rect = CGRectMake(0, 0, contentSizeInPixels_.width, contentSizeInPixels_.height);
+	CGRect rect = CGRectMake(0, 0, contentSize_.width, contentSize_.height);
 	return CGRectApplyAffineTransform(rect, [self nodeToParentTransform]);
 }
 
 -(void) setVertexZ:(float)vertexZ
 {
-	vertexZ_ = vertexZ * CC_CONTENT_SCALE_FACTOR();
+	vertexZ_ = vertexZ;
 }
 
 -(float) scale
@@ -239,9 +191,9 @@
 		
 		rotation_ = 0.0f;
 		scaleX_ = scaleY_ = 1.0f;
-		positionInPixels_ = position_ = CGPointZero;
-		anchorPointInPixels_ = anchorPoint_ = CGPointZero;
-		contentSizeInPixels_ = contentSize_ = CGSizeZero;
+        position_ = CGPointZero;
+		anchorPointInPoints_ = anchorPoint_ = CGPointZero;
+        contentSize_ = CGSizeZero;
 		
 		
 		// "whole screen" objects. like Scenes and Layers, should set isRelativeAnchorPoint to NO
@@ -585,15 +537,15 @@
 	// XXX: Expensive calls. Camera should be integrated into the cached affine matrix
 	if ( camera_ && !(grid_ && grid_.active) )
 	{
-		BOOL translate = (anchorPointInPixels_.x != 0.0f || anchorPointInPixels_.y != 0.0f);
+		BOOL translate = (anchorPointInPoints_.x != 0.0f || anchorPointInPoints_.y != 0.0f);
 		
 		if( translate )
-			ccglTranslate(RENDER_IN_SUBPIXEL(anchorPointInPixels_.x), RENDER_IN_SUBPIXEL(anchorPointInPixels_.y), 0);
+			ccglTranslate(RENDER_IN_SUBPIXEL(anchorPointInPoints_.x), RENDER_IN_SUBPIXEL(anchorPointInPoints_.y), 0);
 		
 		[camera_ locate];
 		
 		if( translate )
-			ccglTranslate(RENDER_IN_SUBPIXEL(-anchorPointInPixels_.x), RENDER_IN_SUBPIXEL(-anchorPointInPixels_.y), 0);
+			ccglTranslate(RENDER_IN_SUBPIXEL(-anchorPointInPoints_.x), RENDER_IN_SUBPIXEL(-anchorPointInPoints_.y), 0);
 	}
 	
 	
@@ -603,13 +555,13 @@
 	// BEGIN original implementation
 	// 
 	// translate
-	if ( isRelativeAnchorPoint_ && (anchorPointInPixels_.x != 0 || anchorPointInPixels_.y != 0 ) )
-		glTranslatef( RENDER_IN_SUBPIXEL(-anchorPointInPixels_.x), RENDER_IN_SUBPIXEL(-anchorPointInPixels_.y), 0);
+	if ( isRelativeAnchorPoint_ && (anchorPointInPoints_.x != 0 || anchorPointInPoints_.y != 0 ) )
+		glTranslatef( RENDER_IN_SUBPIXEL(-anchorPointInPoints_.x), RENDER_IN_SUBPIXEL(-anchorPointInPoints_.y), 0);
 	
-	if (anchorPointInPixels_.x != 0 || anchorPointInPixels_.y != 0)
-		glTranslatef( RENDER_IN_SUBPIXEL(positionInPixels_.x + anchorPointInPixels_.x), RENDER_IN_SUBPIXEL(positionInPixels_.y + anchorPointInPixels_.y), vertexZ_);
-	else if ( positionInPixels_.x !=0 || positionInPixels_.y !=0 || vertexZ_ != 0)
-		glTranslatef( RENDER_IN_SUBPIXEL(positionInPixels_.x), RENDER_IN_SUBPIXEL(positionInPixels_.y), vertexZ_ );
+	if (anchorPointInPoints_.x != 0 || anchorPointInPoints_.y != 0)
+		glTranslatef( RENDER_IN_SUBPIXEL(position_.x + anchorPointInPoints_.x), RENDER_IN_SUBPIXEL(position_.y + anchorPointInPoints_.y), vertexZ_);
+	else if ( position_.x !=0 || position_.y !=0 || vertexZ_ != 0)
+		glTranslatef( RENDER_IN_SUBPIXEL(position_.x), RENDER_IN_SUBPIXEL(position_.y), vertexZ_ );
 	
 	// rotate
 	if (rotation_ != 0.0f )
@@ -623,8 +575,8 @@
 		[camera_ locate];
 	
 	// restore and re-position point
-	if (anchorPointInPixels_.x != 0.0f || anchorPointInPixels_.y != 0.0f)
-		glTranslatef(RENDER_IN_SUBPIXEL(-anchorPointInPixels_.x), RENDER_IN_SUBPIXEL(-anchorPointInPixels_.y), 0);
+	if (anchorPointInPoints_.x != 0.0f || anchorPointInPoints_.y != 0.0f)
+		glTranslatef(RENDER_IN_SUBPIXEL(-anchorPointInPoints_.x), RENDER_IN_SUBPIXEL(-anchorPointInPoints_.y), 0);
 	
 	//
 	// END original implementation
@@ -755,11 +707,11 @@
 		
 		transform_ = CGAffineTransformIdentity;
 		
-		if ( !isRelativeAnchorPoint_ && !CGPointEqualToPoint(anchorPointInPixels_, CGPointZero) )
-			transform_ = CGAffineTransformTranslate(transform_, anchorPointInPixels_.x, anchorPointInPixels_.y);
+		if ( !isRelativeAnchorPoint_ && !CGPointEqualToPoint(anchorPointInPoints_, CGPointZero) )
+			transform_ = CGAffineTransformTranslate(transform_, anchorPointInPoints_.x, anchorPointInPoints_.y);
 		
-		if( ! CGPointEqualToPoint(positionInPixels_, CGPointZero) )
-			transform_ = CGAffineTransformTranslate(transform_, positionInPixels_.x, positionInPixels_.y);
+		if( ! CGPointEqualToPoint(position_, CGPointZero) )
+			transform_ = CGAffineTransformTranslate(transform_, position_.x, position_.y);
 		
 		if( rotation_ != 0 )
 			transform_ = CGAffineTransformRotate(transform_, -CC_DEGREES_TO_RADIANS(rotation_));
@@ -767,8 +719,8 @@
 		if( ! (scaleX_ == 1 && scaleY_ == 1) ) 
 			transform_ = CGAffineTransformScale(transform_, scaleX_, scaleY_);
 		
-		if( ! CGPointEqualToPoint(anchorPointInPixels_, CGPointZero) )
-			transform_ = CGAffineTransformTranslate(transform_, -anchorPointInPixels_.x, -anchorPointInPixels_.y);
+		if( ! CGPointEqualToPoint(anchorPointInPoints_, CGPointZero) )
+			transform_ = CGAffineTransformTranslate(transform_, -anchorPointInPoints_.x, -anchorPointInPoints_.y);
 		
 		isTransformDirty_ = NO;
 	}
@@ -803,53 +755,25 @@
 
 - (CGPoint)convertToNodeSpace:(CGPoint)worldPoint
 {
-	CGPoint ret;
-	if( CC_CONTENT_SCALE_FACTOR() == 1 )
-		ret = CGPointApplyAffineTransform(worldPoint, [self worldToNodeTransform]);
-	else {
-		ret = ccpMult( worldPoint, CC_CONTENT_SCALE_FACTOR() );
-		ret = CGPointApplyAffineTransform(ret, [self worldToNodeTransform]);
-		ret = ccpMult( ret, 1/CC_CONTENT_SCALE_FACTOR() );
-	}
-	
+	CGPoint ret = CGPointApplyAffineTransform(worldPoint, [self worldToNodeTransform]);
 	return ret;
 }
 
 - (CGPoint)convertToWorldSpace:(CGPoint)nodePoint
 {
-	CGPoint ret;
-	if( CC_CONTENT_SCALE_FACTOR() == 1 )
-		ret = CGPointApplyAffineTransform(nodePoint, [self nodeToWorldTransform]);
-	else {
-		ret = ccpMult( nodePoint, CC_CONTENT_SCALE_FACTOR() );
-		ret = CGPointApplyAffineTransform(ret, [self nodeToWorldTransform]);
-		ret = ccpMult( ret, 1/CC_CONTENT_SCALE_FACTOR() );
-	}
-	
+	CGPoint ret = CGPointApplyAffineTransform(nodePoint, [self nodeToWorldTransform]);
 	return ret;
 }
 
 - (CGPoint)convertToNodeSpaceAR:(CGPoint)worldPoint
 {
-	CGPoint nodePoint = [self convertToNodeSpace:worldPoint];
-	CGPoint anchorInPoints;
-	if( CC_CONTENT_SCALE_FACTOR() == 1 )
-		anchorInPoints = anchorPointInPixels_;
-	else
-		anchorInPoints = ccpMult( anchorPointInPixels_, 1/CC_CONTENT_SCALE_FACTOR() );
-	   
-	return ccpSub(nodePoint, anchorInPoints);
+	CGPoint nodePoint = [self convertToNodeSpace:worldPoint];	   
+	return ccpSub(nodePoint, anchorPointInPoints_);
 }
 
 - (CGPoint)convertToWorldSpaceAR:(CGPoint)nodePoint
-{
-	CGPoint anchorInPoints;
-	if( CC_CONTENT_SCALE_FACTOR() == 1 )
-		anchorInPoints = anchorPointInPixels_;
-	else
-		anchorInPoints = ccpMult( anchorPointInPixels_, 1/CC_CONTENT_SCALE_FACTOR() );
-	
-	nodePoint = ccpAdd(nodePoint, anchorInPoints);
+{	
+	nodePoint = ccpAdd(nodePoint, anchorPointInPoints_);
 	return [self convertToWorldSpace:nodePoint];
 }
 

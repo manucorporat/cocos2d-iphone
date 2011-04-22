@@ -104,13 +104,12 @@ enum {
 	
 	// position of the node
 	CGPoint position_;
-	CGPoint	positionInPixels_;
 
 	// is visible
 	BOOL visible_;
 	
 	// anchor point in pixels
-	CGPoint anchorPointInPixels_;	
+	CGPoint anchorPointInPoints_;	
 	// anchor point normalized
 	CGPoint anchorPoint_;	
 	// If YES the transformtions will be relative to (-transform.x, -transform.y).
@@ -120,7 +119,6 @@ enum {
 	
 	// untransformed size of the node
 	CGSize	contentSize_;
-	CGSize	contentSizeInPixels_;
 	
 	// transform
 	CGAffineTransform transform_, inverse_;
@@ -184,10 +182,7 @@ enum {
 @property(nonatomic,readwrite,assign) float scaleY;
 /** Position (x,y) of the node in points. (0,0) is the left-bottom corner. */
 @property(nonatomic,readwrite,assign) CGPoint position;
-/** Position (x,y) of the node in points. (0,0) is the left-bottom corner. */
-@property(nonatomic,readwrite,assign) CGPoint positionInPixels;
-/** A CCCamera object that lets you move the node using a gluLookAt
-*/
+/** A CCCamera object that lets you move the node using a gluLookAt */
 @property(nonatomic,readonly) CCCamera* camera;
 /** Array of children */
 @property(nonatomic,readonly) CCArray *children;
@@ -206,7 +201,7 @@ enum {
 /** The anchorPoint in absolute pixels.
  Since v0.8 you can only read it. If you wish to modify it, use anchorPoint instead
  */
-@property(nonatomic,readonly) CGPoint anchorPointInPixels;
+@property(nonatomic,readonly) CGPoint anchorPointInPoints;
 
 /** The untransformed size of the node in Points
  The contentSize remains the same no matter the node is scaled or rotated.
@@ -214,13 +209,6 @@ enum {
  @since v0.8
  */
 @property (nonatomic,readwrite) CGSize contentSize;
-
-/** The untransformed size of the node in Pixels
- The contentSize remains the same no matter the node is scaled or rotated.
- All nodes has a size. Layer and Scene has the same size of the screen.
- @since v0.8
- */
-@property (nonatomic,readwrite) CGSize contentSizeInPixels;
 
 /** whether or not the node is running */
 @property(nonatomic,readonly) BOOL isRunning;
@@ -360,15 +348,6 @@ enum {
  @since v0.8.2
  */
 - (CGRect) boundingBox;
-
-/** returns a "local" axis aligned bounding box of the node in pixels.
- The returned box is relative only to its parent.
- The returned box is in Points.
- 
- @since v0.99.5
- */
-- (CGRect) boundingBoxInPixels;
-
 
 // actions
 

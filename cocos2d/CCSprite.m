@@ -336,25 +336,26 @@ struct transformValues_ {
 	[self setTextureRectInPixels:rectInPixels rotated:NO untrimmedSize:rectInPixels.size];
 }
 
--(void)setTextureRectInPixels:(CGRect)rect rotated:(BOOL)rotated untrimmedSize:(CGSize)untrimmedSize
+-(void)setTextureRectInPixels:(CGRect)rect rotated:(BOOL)rotated untrimmedSize:(CGSize)untrimmedSizeInPixels
 {
 	rectInPixels_ = rect;
 	rect_ = CC_RECT_PIXELS_TO_POINTS( rect );
 	rectRotated_ = rotated;
 
-	[self setContentSizeInPixels:untrimmedSize];
+    CGSize untrimmedSize = CC_SIZE_PIXELS_TO_POINTS(untrimmedSizeInPixels);
+	[self setContentSize:untrimmedSize];
 	[self updateTextureCoords:rectInPixels_];
 
-	CGPoint relativeOffsetInPixels = unflippedOffsetPositionFromCenter_;
+	CGPoint relativeOffset = unflippedOffsetPositionFromCenter_;
 	
 	// issue #732
 	if( flipX_ )
-		relativeOffsetInPixels.x = -relativeOffsetInPixels.x;
+		relativeOffset.x = -relativeOffset.x;
 	if( flipY_ )
-		relativeOffsetInPixels.y = -relativeOffsetInPixels.y;
+		relativeOffset.y = -relativeOffset.y;
 	
-	offsetPositionInPixels_.x = relativeOffsetInPixels.x + (contentSizeInPixels_.width - rectInPixels_.size.width) / 2;
-	offsetPositionInPixels_.y = relativeOffsetInPixels.y + (contentSizeInPixels_.height - rectInPixels_.size.height) / 2;
+	offsetPosition_.x = relativeOffset.x + (contentSize_.width - rect_.size.width) / 2;
+	offsetPosition_.y = relativeOffset.y + (contentSize_.height - rect_.size.height) / 2;
 	
 	
 	// rendering using batch node
@@ -367,10 +368,10 @@ struct transformValues_ {
 	else
 	{
 		// Atlas: Vertex
-		float x1 = 0 + offsetPositionInPixels_.x;
-		float y1 = 0 + offsetPositionInPixels_.y;
-		float x2 = x1 + rectInPixels_.size.width;
-		float y2 = y1 + rectInPixels_.size.height;
+		float x1 = offsetPosition_.x;
+		float y1 = offsetPosition_.y;
+		float x2 = x1 + rect_.size.width;
+		float y2 = y1 + rect_.size.height;
 		
 		// Don't update Z.
 		quad_.bl.vertices = (ccVertex3F) { x1, y1, 0 };
@@ -382,7 +383,7 @@ struct transformValues_ {
 
 -(void)updateTextureCoords:(CGRect)rect
 {
-	CCTexture2D *tex	= (usesBatchNode_)?[textureAtlas_ texture]:texture_;
+	CCTexture2D *tex = (usesBatchNode_) ? [textureAtlas_ texture] : texture_;
 	if(!tex)
 		return;
 	
@@ -475,8 +476,8 @@ struct transformValues_ {
 		
 		matrix = CGAffineTransformMake( c * scaleX_,  s * scaleX_,
 									   -s * scaleY_, c * scaleY_,
-									   positionInPixels_.x, positionInPixels_.y);
-		matrix = CGAffineTransformTranslate(matrix, -anchorPointInPixels_.x, -anchorPointInPixels_.y);		
+									   position_.x, position_.y);
+		matrix = CGAffineTransformTranslate(matrix, -anchorPointInPoints_.x, -anchorPointInPoints_.y);		
 
 		
 	}  else { 	// parent_ != batchNode_ 
@@ -508,9 +509,8 @@ struct transformValues_ {
 				newMatrix = CGAffineTransformTranslate(newMatrix, tv.pos.x, tv.pos.y);
 			if( prevHonor & CC_HONOR_PARENT_TRANSFORM_ROTATE )
 				newMatrix = CGAffineTransformRotate(newMatrix, -CC_DEGREES_TO_RADIANS(tv.rotation));
-			if( prevHonor & CC_HONOR_PARENT_TRANSFORM_SCALE ) {
+			if( prevHonor & CC_HONOR_PARENT_TRANSFORM_SCALE )
 				newMatrix = CGAffineTransformScale(newMatrix, tv.scale.x, tv.scale.y);
-			}
 			
 			// 3rd: Translate anchor point
 			newMatrix = CGAffineTransformTranslate(newMatrix, -tv.ap.x, -tv.ap.y);
@@ -527,10 +527,10 @@ struct transformValues_ {
 	// calculate the Quad based on the Affine Matrix
 	//	
 
-	CGSize size = rectInPixels_.size;
+	CGSize size = rect_.size;
 
-	float x1 = offsetPositionInPixels_.x;
-	float y1 = offsetPositionInPixels_.y;
+	float x1 = offsetPosition_.x;
+	float y1 = offsetPosition_.y;
 	
 	float x2 = x1 + size.width;
 	float y2 = y1 + size.height;
@@ -566,11 +566,11 @@ struct transformValues_ {
 // this fuction return the 5 values in 1 single call
 -(void) getTransformValues:(struct transformValues_*) tv
 {
-	tv->pos			= positionInPixels_;
+	tv->pos			= position_;
 	tv->scale.x		= scaleX_;
 	tv->scale.y		= scaleY_;
 	tv->rotation	= rotation_;
-	tv->ap			= anchorPointInPixels_;
+	tv->ap			= anchorPointInPoints_;
 	tv->visible		= visible_;
 }
 
@@ -716,12 +716,6 @@ struct transformValues_ {
 	SET_DIRTY_RECURSIVELY();
 }
 
--(void)setPositionInPixels:(CGPoint)pos
-{
-	[super setPositionInPixels:pos];
-	SET_DIRTY_RECURSIVELY();
-}
-
 -(void)setRotation:(float)rot
 {
 	[super setRotation:rot];
@@ -774,7 +768,7 @@ struct transformValues_ {
 {
 	if( flipX_ != b ) {
 		flipX_ = b;
-		[self setTextureRectInPixels:rectInPixels_ rotated:rectRotated_ untrimmedSize:contentSizeInPixels_];
+		[self setTextureRectInPixels:rectInPixels_ rotated:rectRotated_ untrimmedSize:CC_SIZE_POINTS_TO_PIXELS(contentSize_)];
 	}
 }
 -(BOOL) flipX
@@ -786,7 +780,7 @@ struct transformValues_ {
 {
 	if( flipY_ != b ) {
 		flipY_ = b;	
-		[self setTextureRectInPixels:rectInPixels_ rotated:rectRotated_ untrimmedSize:contentSizeInPixels_];
+		[self setTextureRectInPixels:rectInPixels_ rotated:rectRotated_ untrimmedSize:CC_SIZE_POINTS_TO_PIXELS(contentSize_)];
 	}	
 }
 -(BOOL) flipY
@@ -848,10 +842,12 @@ struct transformValues_ {
 {
 	color_ = colorUnmodified_ = color3;
 	
-	if( opacityModifyRGB_ ){
-		color_.r = color3.r * opacity_/255;
-		color_.g = color3.g * opacity_/255;
-		color_.b = color3.b * opacity_/255;
+	if( opacityModifyRGB_ )
+    {
+        const GLubyte op = opacity_/255;
+		color_.r = color3.r * op;
+		color_.g = color3.g * op;
+		color_.b = color3.b * op;
 	}
 	
 	[self updateColor];
@@ -876,7 +872,7 @@ struct transformValues_ {
 
 -(void) setDisplayFrame:(CCSpriteFrame*)frame
 {
-	unflippedOffsetPositionFromCenter_ = frame.offsetInPixels;
+	unflippedOffsetPositionFromCenter_ = frame.offset;
 
 	CCTexture2D *newTexture = [frame texture];
 	// update texture before updating texture rect
@@ -885,7 +881,7 @@ struct transformValues_ {
 	
 	// update rect
 	rectRotated_ = frame.rotated;
-	[self setTextureRectInPixels:frame.rectInPixels rotated:frame.rotated untrimmedSize:frame.originalSizeInPixels];
+	[self setTextureRectInPixels:frame.rectInPixels rotated:rectRotated_ untrimmedSize:frame.originalSizeInPixels];
 }
 
 // XXX deprecated

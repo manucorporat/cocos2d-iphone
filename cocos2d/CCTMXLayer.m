@@ -176,11 +176,11 @@
 		
 		// offset (after layer orientation is set);
 		CGPoint offset = [self calculateLayerOffset:layerInfo.offset];
-		[self setPositionInPixels:offset];
+		[self setPosition:CC_POINT_PIXELS_TO_POINTS(offset)];
 		
 		atlasIndexArray_ = ccCArrayNew(totalNumberOfTiles);
 		
-		[self setContentSizeInPixels: CGSizeMake( layerSize_.width * mapTileSize_.width, layerSize_.height * mapTileSize_.height )];
+		[self setContentSize: CC_SIZE_PIXELS_TO_POINTS(CGSizeMake( layerSize_.width * mapTileSize_.width, layerSize_.height * mapTileSize_.height ))];
 		
 		useAutomaticVertexZ_= NO;
 		vertexZvalue_ = 0;
@@ -242,8 +242,8 @@
 	// Parse cocos2d properties
 	[self parseInternalProperties];
 	
-	for( NSUInteger y=0; y < layerSize_.height; y++ ) {
-		for( NSUInteger x=0; x < layerSize_.width; x++ ) {
+	for( NSUInteger y = 0; y < layerSize_.height; y++ ) {
+		for( NSUInteger x = 0; x < layerSize_.width; x++ ) {
 			
 			NSUInteger pos = x + layerSize_.width * y;
 			uint32_t gid = tiles_[ pos ];
@@ -310,9 +310,9 @@
 		if( ! tile ) {
 			CGRect rect = [tileset_ rectForGID:gid];			
 			tile = [[CCSprite alloc] initWithBatchNode:self rectInPixels:rect];
-			[tile setPositionInPixels: [self positionAt:pos]];
+			[tile setPosition:CC_POINT_PIXELS_TO_POINTS([self positionAt:pos])];
 			[tile setVertexZ: [self vertexZForPos:pos]];
-			tile.anchorPoint = CGPointZero;
+			[tile setAnchorPoint: CGPointZero];
 			[tile setOpacity:opacity_];
 			
 			NSUInteger indexForZ = [self atlasIndexForExistantZ:z];
@@ -345,9 +345,10 @@
 	else
 		[reusedTile_ initWithBatchNode:self rectInPixels:rect];
 	
-	[reusedTile_ setPositionInPixels: [self positionAt:pos]];
+    CGPoint p = [self positionAt:pos];
+	[reusedTile_ setPosition: CC_POINT_PIXELS_TO_POINTS(p)];
 	[reusedTile_ setVertexZ: [self vertexZForPos:pos]];
-	reusedTile_.anchorPoint = CGPointZero;
+	[reusedTile_ setAnchorPoint: CGPointZero];
 	[reusedTile_ setOpacity:opacity_];
 	
 	// get atlas index
@@ -383,9 +384,10 @@
 	else
 		[reusedTile_ initWithBatchNode:self rectInPixels:rect];
 	
-	[reusedTile_ setPositionInPixels: [self positionAt:pos]];
+    CGPoint p = [self positionAt:pos];
+	[reusedTile_ setPosition: CC_POINT_PIXELS_TO_POINTS(p)];
 	[reusedTile_ setVertexZ: [self vertexZForPos:pos]];
-	reusedTile_.anchorPoint = CGPointZero;
+	[reusedTile_ setAnchorPoint:CGPointZero];
 	[reusedTile_ setOpacity:opacity_];
 	
 	// get atlas index
@@ -413,9 +415,10 @@
 	else
 		[reusedTile_ initWithBatchNode:self rectInPixels:rect];
 	
-	[reusedTile_ setPositionInPixels: [self positionAt:pos]];
+    CGPoint p = [self positionAt:pos];
+	[reusedTile_ setPosition: CC_POINT_PIXELS_TO_POINTS(p)];
 	[reusedTile_ setVertexZ: [self vertexZForPos:pos]];
-	reusedTile_.anchorPoint = CGPointZero;
+	[reusedTile_ setAnchorPoint: CGPointZero];
 	[reusedTile_ setOpacity:opacity_];
 	
 	// optimization:

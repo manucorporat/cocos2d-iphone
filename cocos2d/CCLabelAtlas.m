@@ -139,7 +139,7 @@
 	CGSize s;
 	s.width = len * itemWidth_;
 	s.height = itemHeight_;
-	[self setContentSizeInPixels:s];
+	[self setContentSize:s];
 }
 
 -(NSString*) string

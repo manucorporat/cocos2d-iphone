@@ -251,7 +251,7 @@
 
 	if( target.camera.dirty ) {
 
-		CGPoint offset = [target anchorPointInPixels];
+		CGPoint offset = CC_POINT_PIXELS_TO_POINTS([target anchorPointInPoints]);
 
 		//
 		// XXX: Camera should be applied in the AnchorPoint

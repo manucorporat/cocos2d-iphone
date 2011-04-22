@@ -124,8 +124,7 @@
 	
 	// Adjust the orthographic propjection and viewport
 	ccglOrtho((float)-1.0 / widthRatio,  (float)1.0 / widthRatio, (float)-1.0 / heightRatio, (float)1.0 / heightRatio, -1,1);
-	glViewport(0, 0, texSize.width, texSize.height);
-	
+    glViewport(0, 0, texSize.width * CC_CONTENT_SCALE_FACTOR(), texSize.height * CC_CONTENT_SCALE_FACTOR());	
 	
 	glGetIntegerv(CC_GL_FRAMEBUFFER_BINDING, &oldFBO_);
 	ccglBindFramebuffer(CC_GL_FRAMEBUFFER, fbo_);//Will direct drawing to the frame buffer created above
@@ -163,7 +162,11 @@
 	// Restore the original matrix and viewport
 	glPopMatrix();
 	CGSize size = [[CCDirector sharedDirector] displaySizeInPixels];
-	glViewport(0, 0, size.width, size.height);
+    
+    if( CC_CONTENT_SCALE_FACTOR() != 1)
+        glViewport(0, -size.height, size.width * CC_CONTENT_SCALE_FACTOR(), size.height * CC_CONTENT_SCALE_FACTOR());
+    else
+        glViewport(0, 0, size.width, size.height);
 }
 
 -(void)clear:(float)r g:(float)g b:(float)b a:(float)a

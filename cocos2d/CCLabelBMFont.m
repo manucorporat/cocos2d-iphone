@@ -564,8 +564,10 @@ typedef struct _KerningHashElement
 		}
 		
 		float yOffset = configuration_->commonHeight_ - fontDef.yOffset;
-		fontChar.positionInPixels = ccp( (float)nextFontPositionX + fontDef.xOffset + fontDef.rect.size.width*0.5f + kerningAmount,
+        CGPoint p = ccp( (float)nextFontPositionX + fontDef.xOffset + fontDef.rect.size.width*0.5f + kerningAmount,
 								(float)nextFontPositionY + yOffset - rect.size.height*0.5f );
+        
+        [fontChar setPosition:CC_POINT_PIXELS_TO_POINTS(p)];
 
 		// update kerning
 		nextFontPositionX += configuration_->BMFontArray_[c].xAdvance + kerningAmount;
@@ -588,7 +590,7 @@ typedef struct _KerningHashElement
 	tmpSize.width = longestLine;
 	tmpSize.height = totalHeight;
 
-	[self setContentSizeInPixels:tmpSize];
+	[self setContentSize:CC_SIZE_PIXELS_TO_POINTS(tmpSize)];
 }
 
 #pragma mark BitmapFontAtlas - CCLabelProtocol protocol

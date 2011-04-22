@@ -1039,7 +1039,7 @@ Class restartAction()
 		[map addChild:tamara z: [[map children] count]];
 		[tamara retain];
 		int mapWidth = map.mapSize.width * map.tileSize.width;
-		[tamara setPositionInPixels:ccp( mapWidth/2,0)];
+		[tamara setPosition:CC_POINT_PIXELS_TO_POINTS(ccp( mapWidth/2,0))];
 		[tamara setAnchorPoint:ccp(0.5f,0)];
 
 		
@@ -1062,7 +1062,7 @@ Class restartAction()
 
 -(void) repositionSprite:(ccTime)dt
 {
-	CGPoint p = [tamara positionInPixels];
+	CGPoint p = CC_POINT_PIXELS_TO_POINTS([tamara position]);
 	CCNode *map = [self getChildByTag:kTagTileMap];
 	
 	// there are only 4 layers. (grass and 3 trees layers)
@@ -1126,7 +1126,7 @@ Class restartAction()
 
 -(void) repositionSprite:(ccTime)dt
 {
-	CGPoint p = [tamara positionInPixels];
+	CGPoint p = CC_POINT_PIXELS_TO_POINTS([tamara position]);
 	CCNode *map = [self getChildByTag:kTagTileMap];
 	
 	// there are only 4 layers. (grass and 3 trees layers)
@@ -1195,7 +1195,7 @@ Class restartAction()
 {
 	// tile height is 64x32
 	// map size: 30x30
-	CGPoint p = [tamara positionInPixels];
+	CGPoint p = CC_POINT_PIXELS_TO_POINTS([tamara position]);
 	[tamara setVertexZ: -( (p.y+32) /16) ];
 }
 
@@ -1268,7 +1268,7 @@ Class restartAction()
 {
 	// tile height is 101x81
 	// map size: 12x12
-	CGPoint p = [tamara positionInPixels];
+	CGPoint p = CC_POINT_PIXELS_TO_POINTS([tamara position]);
 	[tamara setVertexZ: -( (p.y+81) /81) ];
 }
 

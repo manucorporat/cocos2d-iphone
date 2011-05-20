@@ -268,6 +268,8 @@ typedef struct _PVRTexHeader
 
 - (BOOL)createGLTexture
 {
+    glGetError(); // Clear error code
+
 	GLsizei width = width_;
 	GLsizei height = height_;
 	GLenum err;

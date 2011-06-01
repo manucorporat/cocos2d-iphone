@@ -121,13 +121,16 @@
 {
 	if( data->num > 0 )
 		return data->arr[data->num-1];
+    
 	return nil;
 }
 
 - (id) randomObject
 {
-	if(data->num==0) return nil;
-	return data->arr[(int)(data->num*CCRANDOM_0_1())];
+	if(data->num > 0)
+        return data->arr[(int)((float)data->num * CCRANDOM_0_1())];
+    
+    return nil;
 }
 
 - (NSArray*) getNSArray
@@ -210,7 +213,9 @@
     NSUInteger index2 = ccArrayGetIndexOfObject(data, object2);
     if(index2 == NSNotFound) return;
     
-    ccArraySwapObjectsAtIndexes(data, index1, index2);
+    // SWAP    
+	data->arr[index1] = object2;
+	data->arr[index2] = object1;
 }
 
 - (void) exchangeObjectAtIndex:(NSUInteger)index1 withObjectAtIndex:(NSUInteger)index2

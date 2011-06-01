@@ -201,7 +201,7 @@ enum {
 /** The anchorPoint in absolute pixels.
  Since v0.8 you can only read it. If you wish to modify it, use anchorPoint instead
  */
-@property(nonatomic,readonly) CGPoint anchorPointInPoints;
+@property(nonatomic,readwrite) CGPoint anchorPointInPoints;
 
 /** The untransformed size of the node in Points
  The contentSize remains the same no matter the node is scaled or rotated.

@@ -137,6 +137,18 @@
 	}
 }
 
+-(void) setAnchorPointInPoints:(CGPoint)point
+{
+	if( ! CGPointEqualToPoint(point, anchorPointInPoints_) ) {
+		anchorPointInPoints_ = point;
+		anchorPoint_ = ccp( anchorPointInPoints_.x / contentSize_.width, anchorPointInPoints_.y / contentSize_.height );
+		isTransformDirty_ = isInverseDirty_ = YES;
+#if CC_NODE_TRANSFORM_USING_AFFINE_MATRIX
+		isTransformGLDirty_ = YES;
+#endif		
+	}
+}
+
 -(void) setContentSize:(CGSize)size
 {
 	if( ! CGSizeEqualToSize(size, contentSize_) ) {

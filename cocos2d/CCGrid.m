@@ -204,13 +204,14 @@
 
 -(void)set2DProjection
 {
-	CGSize	winSize = [[CCDirector sharedDirector] winSizeInPixels];
+	CGSize	sizeInPixels = [[CCDirector sharedDirector] displaySizeInPixels];
+    CGSize	sizeInPoints = CC_SIZE_PIXELS_TO_POINTS(sizeInPixels);
 	
 	glLoadIdentity();
-	glViewport(0, 0, winSize.width, winSize.height);
+	glViewport(0, 0, sizeInPixels.width, sizeInPixels.height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	ccglOrtho(0, winSize.width, 0, winSize.height, -1024, 1024);
+	ccglOrtho(0, sizeInPoints.width, 0, sizeInPoints.height, -1024, 1024);
 	glMatrixMode(GL_MODELVIEW);
 }
 
@@ -219,17 +220,21 @@
 {
 	CCDirector *director = [CCDirector sharedDirector];
 	
-	CGSize	winSize = [director displaySizeInPixels];
+	CGSize	sizeInPixels = [director displaySizeInPixels];
+    CGSize	sizeInPoints = CC_SIZE_PIXELS_TO_POINTS(sizeInPixels);
 	
-	glViewport(0, 0, winSize.width, winSize.height);
+	glViewport(0, 0, sizeInPixels.width, sizeInPixels.height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(60, (GLfloat)winSize.width/winSize.height, 0.5f, 1500.0f);
+	gluPerspective(60, (GLfloat)sizeInPixels.width/sizeInPixels.height, 0.5f, 1500.0f);
 	
 	glMatrixMode(GL_MODELVIEW);	
 	glLoadIdentity();
-	gluLookAt( winSize.width/2, winSize.height/2, [director getZEye],
-			  winSize.width/2, winSize.height/2, 0,
+    
+    float eyeZ = sizeInPoints.height * [director getZEye] / sizeInPixels.height;
+
+	gluLookAt( sizeInPoints.width/2, sizeInPoints.height/2, eyeZ,
+			  sizeInPoints.width/2, sizeInPoints.height/2, 0,
 			  0.0f, 1.0f, 0.0f
 			  );
 }

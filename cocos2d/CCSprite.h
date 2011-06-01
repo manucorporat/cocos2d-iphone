@@ -183,7 +183,7 @@ typedef enum {
 /** offset position in pixels of the sprite in points. Calculated automatically by editors like Zwoptex.
  @since v0.99.0
  */
-@property (nonatomic,readonly) CGPoint	offsetPositionInPixels;
+@property (nonatomic,readonly) CGPoint	offsetPosition;
 /** conforms to CCTextureProtocol protocol */
 @property (nonatomic,readwrite) ccBlendFunc blendFunc;
 
@@ -347,5 +347,7 @@ typedef enum {
  @deprecated Use CCAnimationCache instead. Will be removed in 1.0.1
  */
 -(void) addAnimation: (CCAnimation*) animation DEPRECATED_ATTRIBUTE;
+
+- (void) drawPrimitives;
 
 @end

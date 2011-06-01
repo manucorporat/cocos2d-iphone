@@ -161,12 +161,9 @@
 	ccglBindFramebuffer(CC_GL_FRAMEBUFFER, oldFBO_);
 	// Restore the original matrix and viewport
 	glPopMatrix();
-	CGSize size = [[CCDirector sharedDirector] displaySizeInPixels];
     
-    if( CC_CONTENT_SCALE_FACTOR() != 1)
-        glViewport(0, -size.height, size.width * CC_CONTENT_SCALE_FACTOR(), size.height * CC_CONTENT_SCALE_FACTOR());
-    else
-        glViewport(0, 0, size.width, size.height);
+	CGSize size = [[CCDirector sharedDirector] displaySizeInPixels];
+    glViewport(0, 0, size.width, size.height);
 }
 
 -(void)clear:(float)r g:(float)g b:(float)b a:(float)a

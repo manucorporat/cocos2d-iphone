@@ -187,36 +187,32 @@ CGFloat	__ccContentScaleFactor = 1;
 
 -(void) setProjection:(ccDirectorProjection)projection
 {
-	CGSize size = winSizeInPixels_;
-    
-    if( CC_CONTENT_SCALE_FACTOR() != 1)
-        glViewport(0, -size.height * CC_CONTENT_SCALE_FACTOR() / 2.0f, size.width * CC_CONTENT_SCALE_FACTOR(), size.height * CC_CONTENT_SCALE_FACTOR());
-    else
-        glViewport(0, 0, size.width, size.height);
+	CGSize sizeInPixels = [self displaySizeInPixels];
+    CGSize sizeInPoints = CC_SIZE_PIXELS_TO_POINTS(sizeInPixels);
 
+    glViewport(0, 0, sizeInPixels.width, sizeInPixels.height);
 	
 	switch (projection) {
 		case kCCDirectorProjection2D:
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
-			ccglOrtho(0, size.width, 0, size.height, -1024 * CC_CONTENT_SCALE_FACTOR(), 1024 * CC_CONTENT_SCALE_FACTOR());
+			ccglOrtho(0, sizeInPoints.width, 0, sizeInPoints.height, -1024, 1024);
 			glMatrixMode(GL_MODELVIEW);
 			glLoadIdentity();
 			break;
 			
 		case kCCDirectorProjection3D:
 		{
-			float zeye = [self getZEye];
-
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
-//			gluPerspective(60, (GLfloat)size.width/size.height, zeye-size.height/2, zeye+size.height/2 );
-			gluPerspective(60, (GLfloat)size.width/size.height, 0.5f, 1500);
+			gluPerspective(60, (GLfloat)sizeInPixels.width/sizeInPixels.height, 0.5f, 5500);
 
 			glMatrixMode(GL_MODELVIEW);	
 			glLoadIdentity();
-			gluLookAt( size.width/2, size.height/2, zeye,
-					  size.width/2, size.height/2, 0,
+            
+            float eyeZ = sizeInPoints.height * [self getZEye] / sizeInPixels.height;
+			gluLookAt( sizeInPoints.width/2, sizeInPoints.height/2, eyeZ,
+					  sizeInPoints.width/2, sizeInPoints.height/2, 0,
 					  0.0f, 1.0f, 0.0f);
 			break;
 		}
@@ -429,7 +425,7 @@ CGFloat	__ccContentScaleFactor = 1;
 
 -(void) applyOrientation
 {	
-	CGSize s = winSizeInPixels_;
+	CGSize s = CC_SIZE_PIXELS_TO_POINTS(winSizeInPixels_);
 	float w = s.width / 2;
 	float h = s.height / 2;
 	

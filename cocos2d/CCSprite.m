@@ -73,7 +73,7 @@ struct transformValues_ {
 @synthesize textureAtlas = textureAtlas_;
 @synthesize batchNode = batchNode_;
 @synthesize honorParentTransform = honorParentTransform_;
-@synthesize offsetPositionInPixels = offsetPositionInPixels_;
+@synthesize offsetPosition = offsetPosition_;
 
 
 +(id)spriteWithTexture:(CCTexture2D*)texture
@@ -148,7 +148,7 @@ struct transformValues_ {
 		anchorPoint_ =  ccp(0.5f, 0.5f);
 		
 		// zwoptex default values
-		offsetPositionInPixels_ = CGPointZero;
+		offsetPosition_ = CGPointZero;
 		
 		honorParentTransform_ = CC_HONOR_PARENT_TRANSFORM_ALL;
 		hasChildren_ = NO;
@@ -308,8 +308,8 @@ struct transformValues_ {
 	batchNode_ = nil;
 	dirty_ = recursiveDirty_ = NO;
 	
-	float x1 = 0 + offsetPositionInPixels_.x;
-	float y1 = 0 + offsetPositionInPixels_.y;
+	float x1 = 0 + offsetPosition_.x;
+	float y1 = 0 + offsetPosition_.y;
 	float x2 = x1 + rectInPixels_.size.width;
 	float y2 = y1 + rectInPixels_.size.height;
 	quad_.bl.vertices = (ccVertex3F) { x1, y1, 0 };
@@ -821,7 +821,7 @@ struct transformValues_ {
 
 -(void) setOpacity:(GLubyte) anOpacity
 {
-	opacity_			= anOpacity;
+	opacity_ = anOpacity;
 
 	// special opacity for premultiplied textures
 	if( opacityModifyRGB_ )
@@ -832,32 +832,29 @@ struct transformValues_ {
 
 - (ccColor3B) color
 {
-	if(opacityModifyRGB_)
-		return colorUnmodified_;
-	
-	return color_;
+	return colorUnmodified_;
 }
 
 -(void) setColor:(ccColor3B)color3
 {
-	color_ = colorUnmodified_ = color3;
+	colorUnmodified_ = color3;
 	
 	if( opacityModifyRGB_ )
     {
-        const GLubyte op = opacity_/255;
-		color_.r = color3.r * op;
-		color_.g = color3.g * op;
-		color_.b = color3.b * op;
-	}
+        const float op = (float)opacity_/255.0f;
+		color_.r = (float)color3.r * op;
+		color_.g = (float)color3.g * op;
+		color_.b = (float)color3.b * op;
+	}else
+        color_ = color3;
 	
 	[self updateColor];
 }
 
 -(void) setOpacityModifyRGB:(BOOL)modify
 {
-	ccColor3B oldColor	= self.color;
-	opacityModifyRGB_	= modify;
-	self.color			= oldColor;
+    opacityModifyRGB_	= modify;
+	self.color			= colorUnmodified_;
 }
 
 -(BOOL) doesOpacityModifyRGB

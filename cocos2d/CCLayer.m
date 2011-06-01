@@ -412,6 +412,7 @@
 @synthesize startOpacity = startOpacity_;
 @synthesize endColor = endColor_, endOpacity = endOpacity_;
 @synthesize vector = vector_;
+@synthesize compressedInterpolation = compressedInterpolation_;
 
 + (id) layerWithColor: (ccColor4B) start fadingTo: (ccColor4B) end
 {
@@ -436,29 +437,25 @@
 	
 	endOpacity_		= end.a;
 	startOpacity_	= start.a;
-	vector_ = v;
+	vector_ = ccpNormalize(v);
 	
-	start.a	= 255;
 	compressedInterpolation_ = YES;
 
-	return [super initWithColor:start];
+    start.a	= 255;
+	return [self initWithColor:start];
 }
 
 - (void) updateColor
 {
     [super updateColor];
 
-	float h = ccpLength(vector_);
-    if (h == 0)
-		return;
-
-	double c = sqrt(2);
-    CGPoint u = ccp(vector_.x / h, vector_.y / h);
+	float c = sqrtf(2);
+    CGPoint u = vector_;
 
 	// Compressed Interpolation mode
 	if( compressedInterpolation_ ) {
-		float h2 = 1 / ( fabsf(u.x) + fabsf(u.y) );
-		u = ccpMult(u, h2 * (float)c);
+		float h2 = 1.0f / ( fabsf(u.x) + fabsf(u.y) );
+		u = ccpMult(u, h2 * c);
 	}
 	
 	float opacityf = (float)opacity_/255.0f;
@@ -467,16 +464,15 @@
 		color_.r,
 		color_.g,
 		color_.b,
-		startOpacity_*opacityf
+		(float)startOpacity_*opacityf
 	};
 
     ccColor4B E = {
 		endColor_.r,
 		endColor_.g,
 		endColor_.b,
-		endOpacity_*opacityf
+		(float)endOpacity_*opacityf
 	};
-
 
     // (-1, -1)
 	squareColors_[0].r = E.r + (S.r - E.r) * ((c + u.x + u.y) / (2.0f * c));
@@ -498,6 +494,33 @@
 	squareColors_[3].g = E.g + (S.g - E.g) * ((c - u.x - u.y) / (2.0f * c));
 	squareColors_[3].b = E.b + (S.b - E.b) * ((c - u.x - u.y) / (2.0f * c));
 	squareColors_[3].a = E.a + (S.a - E.a) * ((c - u.x - u.y) / (2.0f * c));
+}
+
+- (void)draw
+{		
+	// Default GL states: GL_TEXTURE_2D, GL_VERTEX_ARRAY, GL_COLOR_ARRAY, GL_TEXTURE_COORD_ARRAY
+	// Needed states: GL_VERTEX_ARRAY, GL_COLOR_ARRAY
+	// Unneeded states: GL_TEXTURE_2D, GL_TEXTURE_COORD_ARRAY
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisable(GL_TEXTURE_2D);
+    
+	glVertexPointer(2, GL_FLOAT, 0, squareVertices_);
+	glColorPointer(4, GL_UNSIGNED_BYTE, 0, squareColors_);
+	
+	
+	BOOL newBlend = blendFunc_.src != CC_BLEND_SRC || blendFunc_.dst != CC_BLEND_DST;
+	if( newBlend )
+		glBlendFunc( blendFunc_.src, blendFunc_.dst );
+	else
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	
+    glBlendFunc(CC_BLEND_SRC, CC_BLEND_DST);
+	
+	// restore default GL state
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnable(GL_TEXTURE_2D);
 }
 
 -(ccColor3B) startColor
@@ -530,13 +553,8 @@
 
 -(void) setVector: (CGPoint) v
 {
-    vector_ = v;
+    vector_ = ccpNormalize(v);
     [self updateColor];
-}
-
--(BOOL) compressedInterpolation
-{
-	return compressedInterpolation_;
 }
 
 -(void) setCompressedInterpolation:(BOOL)compress
@@ -544,6 +562,7 @@
 	compressedInterpolation_ = compress;
 	[self updateColor];
 }
+
 @end
 
 #pragma mark -

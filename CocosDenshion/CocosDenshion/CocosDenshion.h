@@ -360,6 +360,7 @@ typedef struct _sourceInfo {
 @property (readonly) NSString *filePath;
 @property (readonly) int soundId;
 
++ (id)load:(int) theSoundId filePath:(const NSString *) theFilePath;
 - (id)init:(int) theSoundId filePath:(const NSString *) theFilePath;
 @end
 

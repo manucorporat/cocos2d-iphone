@@ -1378,6 +1378,11 @@ static BOOL _mixerRateSet = NO;
 
 @synthesize filePath, soundId;
 
++ (id)load:(int) theSoundId filePath:(const NSString *) theFilePath
+{
+    return [[[self alloc] init:theSoundId filePath:theFilePath] autorelease];
+}
+
 -(id) init:(int) theSoundId filePath:(const NSString *) theFilePath
 {
 	if ((self = [super init]))
